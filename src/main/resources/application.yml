@@ -2,24 +2,7 @@
 server:
   port: 9000
   
-spring:
-  application:
-   name: api-gateway
-  cloud:
-    gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/users/**
-
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/api/products/**
-
-       
- 
+          
 eureka:
   instance:
     prefer-ip-address: true
@@ -31,7 +14,33 @@ eureka:
 
       
       
-      
+spring:
+  application:
+    name:  api-gateway
+  cloud:
+    gateway:
+      routes:
+         - id: user-service
+           uri: lb://user-service
+           predicates:
+            - Path=/api/users/**
+
+         - id: product-service
+           uri: lb://product-service
+           predicates:
+            - Path=/api/products/**
+           filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: '#{@userKeyResolver}'
+                redis-rate-limiter.replenishRate: 2
+                redis-rate-limiter.burstCapacity: 4
+          
+          
+management:
+  health:
+    redis:
+      enabled: true      
       
       
       
